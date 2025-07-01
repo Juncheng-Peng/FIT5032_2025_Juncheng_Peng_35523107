@@ -4,11 +4,11 @@
   </div>
 </template>
 <style>
-    .welcome{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.welcome {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
 <script setup>
 import { ref } from 'vue'
