@@ -1,11 +1,13 @@
 <script setup>
 import JSON from '@/components/JSON.vue';
 import JunchegPeng from '@/components/JunchegPeng.vue';
+import Form from '@/components/Form.vue';
+
 </script>
 
 <template>
-  <JunchegPeng />
-  <JSON />
+  <Form />
+
 </template>
 
 <style scoped>
