@@ -1,100 +1,64 @@
 <template>
-  <div>
-    <h1>图书列表</h1>
-
-    <button @click="fetchBooks">fresh name</button>
-    <ul>
-      <li v-for="book in books" :key="book.id">
-        {{ book.name }} (ISBN: {{ book.isbn }})
-
-        <button @click="updateBook(book.id, book.name)" style="margin-left: 10px;">update name</button>
-        <button @click="deleteBook(book.id)">delete</button>
-      </li>
-    </ul>
-  </div>
+    <div>
+        <h1>Add Book</h1>
+        <form @submit.prevent="addBook">
+            <div>
+                <label for="isbn">ISBN:</label>
+                <input type="text" v-model="isbn" id="isbn" required />
+            </div>
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" v-model="name" id="name" required />
+            </div>
+            <div>
+                <label for="author">Author:</label>
+                <input type="text" v-model="author" id="author" required />
+            </div>
+            <button type="submit">Add Book</button>
+        </form>
+    </div>
+    <MyBookList />
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import {ref} from 'vue';
 import db from '../firebase/init';
-import { collection, getDocs, query, doc, deleteDoc, updateDoc } from 'firebase/firestore';
-
+import {collection, addDoc} from 'firebase/firestore';
+import MyBookList from '../views/MyBookList.vue';
 export default {
-  setup() {
-    const books = ref([]);
+    setup() {
+        const isbn = ref('');
+        const name = ref('');
+        const author = ref('');
+        const addBook = async () => {
+            try {
+                const isbnNumber = Number(isbn.value);
+                if(isNaN(isbnNumber)) {
+                    alert('ISBN must be a number');
+                    return;
+                }
+                await addDoc(collection(db, 'books'), {
+                    isbn: isbnNumber,
+                    name: name.value,
+                    author: author.value
+                });
+                isbn.value = '';
+                name.value = '';
+                author.value = '';
+                alert('Book added successfully');
+            }catch(error) {
+                console.error('Error adding book: ', error);
+            }
+};
 
-
-    const fetchBooks = async () => {
-      try {
-        const q = query(collection(db, 'books')); 
-        const querySnapshot = await getDocs(q);
-        const booksArray = [];
-        querySnapshot.forEach((doc) => {
-          booksArray.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        books.value = booksArray;
-        console.log("get it");
-      } catch (error) {
-        console.error("error:", error);
-      }
-    };
-
-    // 删除书籍
-    const deleteBook = async (bookId) => {
-      if (!confirm('Delete book?')) {
-        return;
-      }
-      try {
-        const bookRef = doc(db, 'books', bookId);
-        await deleteDoc(bookRef);
-        alert('Book deleted successfully!');
-        fetchBooks(); // 删除后刷新列表
-      } catch (error) {
-        console.error("Error deleting book: ", error);
-      }
-    };
-
-    // 更新书籍名称的函数
-    const updateBook = async (bookId, currentName) => {
-      const newName = prompt("Please enter the new name:", currentName);
-      if (newName && newName !== currentName) {
-        try {
-          const bookRef = doc(db, 'books', bookId);
-          await updateDoc(bookRef, {
-            name: newName
-          });
-          alert('Book updated successfully!');
-          fetchBooks(); 
-        } catch (error) {
-          console.error("Error updating book: ", error);
-        }
-      }
-    };
-
-    onMounted(() => {
-      fetchBooks();
-    });
-
-    return {
-      books,
-      fetchBooks,
-      deleteBook,
-      updateBook,
-    };
-  }
+return { 
+    isbn,
+    name,
+    addBook,
+    author
+};},
+components: {
+    MyBookList
+}
 };
 </script>
-
-<style scoped>
-  li {
-    list-style: none;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-  }
-  button {
-    margin: 0 5px;
-  }
-</style>
