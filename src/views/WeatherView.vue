@@ -1,5 +1,6 @@
 <template>
 <div class="container">
+  <div class="weather-app"></div>
     <div class="header">
         <h1>WEATHER APP</h1>
         <div class="search-bar">
